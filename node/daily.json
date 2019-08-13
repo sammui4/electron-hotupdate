@@ -1,10 +1,16 @@
 {
-  "title":"0.3.1版本说明",
-  "dailyList":[
+  "version":"0.1.2",
+  "code":200,
+  "manifest":[
     {
-      "text":"暂时屏蔽未完善的立即同步功能。"
+      "version":"0.1.1",
+      "file":["app.js"],
+      "detail":["项目初步构建"]
     },{
-      "text":"暂时屏蔽未完善的立即同步功能。"
+      "version":"0.1.2",
+      "file":[""],
+      "detail":["自动升级尝试"]
     }
   ]
+
 }

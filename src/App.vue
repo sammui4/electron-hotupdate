@@ -2,7 +2,7 @@
  * @Author: w
  * @Date: 2019-08-05 16:11:20
  * @LastEditors: w
- * @LastEditTime: 2019-08-10 18:29:17
+ * @LastEditTime: 2019-08-13 17:37:29
  -->
 <template>
   <div id="app">
@@ -19,6 +19,8 @@
 
 <script>
 import update from "@/components/update.vue";
+import { debuglog } from 'util';
+// const packages = require('../package.json');      //获取当前用户信息
 import { ipcRenderer } from "electron";
 export default {
   name: "app",
@@ -32,70 +34,131 @@ export default {
         percent: 0,
         install: false,
         updateList:[
-          {
-            "text":"暂时屏蔽未完善的立即同步功能。"
-          },{
-            "text":"暂时屏蔽未完善的立即同步功能。"
-          }
+       
         ],
-        title:'0.3.1版本说明'
+        title:''
       }
     };
   },
   mounted() {
-    // ipcRenderer.send("checkForUpdate");
-    // this.updateApp();
-    this.returnMsg();
-    this.download();
-    this.update();
+    // this.returnMsg();
+    // this.download();
+    // this.update();
+    // this.fetchUpdate()
+    this.getUpdateInfo();
   },
   methods: {
-    downloadProgress() {
-      ipcRendereron.on("downloadProgress", (event, data) => {
-        this.percent = data.percent.toFixed(2);
-        if (data.percent >= 100) {
-          this.show = false;
-        }
-      });
+    // downloadProgress() {
+    //   ipcRendereron.on("downloadProgress", (event, data) => {
+    //     this.percent = data.percent.toFixed(2);
+    //     if (data.percent >= 100) {
+    //       this.show = false;
+    //     }
+    //   });
+    // },
+    // returnMsg() {
+    //   ipcRenderer.on("message", (event, data) => {
+    //     switch(data.status){
+    //       case -1:
+    //         this.$message.error(`${data.msg}`);
+    //       break;
+    //       case 0:
+    //         this.$message.info(`${data.msg}`);
+    //       break;
+    //       case 1:
+    //         this.msg.loading = true;
+    //         this.$message.success(`${data.msg}`);
+    //       break;
+    //       default:
+    //         this.msg.loading = false;
+    //         this.$message.success(`${data.msg}`);
+    //       break;
+    //     }
+    //   });
+    // },
+    // download() {
+    //   ipcRenderer.on("downloadProgress", (event, progressObj) => {
+    //     this.msg.percent = progressObj.percent || 0;
+    //   });
+    // },
+    // update() {
+    //   ipcRenderer.on("isUpdateNow", () => {
+    //     ipcRenderer.send("isUpdateNow");
+    //   });
+    // },
+    // updateApp() {
+    //   ipcRenderer.send("checkForUpdate");
+    // },
+    closeUpdate() {
+      this.msg.close = false;
+      this.msg.percent = 0;
+      this.msg.install = false;
     },
-    returnMsg() {
+    getUpdateInfo(){
       ipcRenderer.on("message", (event, data) => {
-        switch(data.status){
-          case -1:
-            this.$message.error(`${data.msg}`);
-          break;
+        switch(data){
           case 0:
+            this.msg.show = false;
             this.$message.info(`${data.msg}`);
           break;
           case 1:
+            this.msg.show = true;
             this.msg.loading = true;
             this.$message.success(`${data.msg}`);
           break;
-          default:
+          case 2:
+            this.msg.show = true;
             this.msg.loading = false;
             this.$message.success(`${data.msg}`);
           break;
         }
       });
     },
-    download() {
-      ipcRenderer.on("downloadProgress", (event, progressObj) => {
-        this.msg.percent = progressObj.percent || 0;
-      });
-    },
-    update() {
-      ipcRenderer.on("isUpdateNow", () => {
-        ipcRenderer.send("isUpdateNow");
-      });
-    },
-    updateApp() {
-      ipcRenderer.send("checkForUpdate");
-    },
-    closeUpdate() {
-      this.msg.close = false;
-      this.msg.percent = 0;
-      this.msg.install = false;
-    }
+    // fetchUpdate(){
+ 
+    //   this.$http({
+    //     method:'get',
+    //     url:'/update'
+    //   }).then(({data})=>{
+    //     if(data.code==200){
+          
+    //       var final = this.compareVersion(packages.version,data.version);
+    //       console.log(final);
+    //       switch(final){
+    //         case 0:
+    //           this.$message.success('暂无新版本!');
+    //         break;
+    //         case 1:
+    //           this.msg.show = true;
+    //           this.$message.success('正在自动下载新版本，请稍候。。。');
+    //         break;
+    //         case 2:
+    //           this.msg.show = true;
+    //           this.$message.success('正在自动下载新版本，请稍候。。。');
+    //         break;
+    //       }
+    //     }
+    //   })
+    // },
+    // 0 一样（或者说不允许替代） 1非核心版本修改 2核心版本修改
+    // v1本地版本 v2远程版本
+    // compareVersion(v1,v2){
+    //   if(v1==v2){
+    //     return 0
+    //   }
+    //   var v1Arr = v1.toString().split('.');
+    //   var v2Arr = v2.toString().split('.');
+    //   if(v1Arr[1] > v2Arr[1]){
+    //     return 0
+    //   }
+    //   if(v1Arr[1] < v2Arr[1] && v1Arr[2] > v2Arr[2]){
+    //     return 0
+    //   }
+    //   if(v1Arr[1] === v2Arr[1]){
+    //     return 1
+    //   }
+    //   return 2
+    // }
   }
 };
 </script>

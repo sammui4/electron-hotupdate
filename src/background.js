@@ -2,7 +2,7 @@
  * @Author: w
  * @Date: 2019-08-06 17:58:22
  * @LastEditors: w
- * @LastEditTime: 2019-08-10 18:27:02
+ * @LastEditTime: 2019-08-13 17:47:45
  */
 
 'use strict'
@@ -16,6 +16,9 @@ import {
   ipcMain   //更新用的
 } from 'electron'
 import { autoUpdater } from "electron-updater" //更新用的
+import fs from 'fs';
+import fetch from './assets/scripts/fetch.js';
+import tar from 'tar';
 import {
   createProtocol,
   installVueDevtools
@@ -65,10 +68,52 @@ function createWindow() {
   // ready后show
   win.on('ready-to-show',()=>{
     win.show();
-    updateHandle();
+    // updateHandle();
+    updateNow()
   })
   createMenu()
   
+}
+
+function updateNow(){
+
+  fetch({
+    method:'get',
+    url:'/update'
+  }).then(({data})=>{
+    if(data.code==200){
+      let final = compareVersion(app.getVersion(),data.version);
+      let url;
+      switch(final){
+        case 1:
+          
+        break;
+        case 2:
+
+        break;
+      }
+      sendUpdateMessage(final);
+    }
+    
+  })
+}
+
+function compareVersion(v1,v2){
+  if(v1==v2){
+    return 0
+  }
+  var v1Arr = v1.toString().split('.');
+  var v2Arr = v2.toString().split('.');
+  if(v1Arr[1] > v2Arr[1]){
+    return 0
+  }
+  if(v1Arr[1] < v2Arr[1] && v1Arr[2] > v2Arr[2]){
+    return 0
+  }
+  if(v1Arr[1] === v2Arr[1]){
+    return 1
+  }
+  return 2
 }
 
 function updateHandle() {

@@ -2,7 +2,7 @@
  * @Author: w
  * @Date: 2019-08-05 16:11:20
  * @LastEditors: w
- * @LastEditTime: 2019-08-10 18:10:09
+ * @LastEditTime: 2019-08-13 15:04:53
  -->
 <template>
   <transition name="fade">
@@ -35,6 +35,7 @@
 
 <script>
 import { ipcRenderer } from "electron";
+import queueAjax from '@/assets/scripts/queue.js'
 export default {
   name: "update",
   props: {
@@ -59,11 +60,12 @@ export default {
   },
   methods: {
     close() {
-      ipcRenderer.removeAllListeners(["message", "downloadProgress", "isUpdateNow"]);//remove只能移除单个事件，单独封装removeAll移除所有事件
+      // ipcRenderer.removeAllListeners(["message", "downloadProgress", "isUpdateNow"]);//remove只能移除单个事件，单独封装removeAll移除所有事件
       this.$emit("update:show", false);
     },
     updateApp() {
-      ipcRenderer.send("checkForUpdate");
+      // ipcRenderer.send("checkForUpdate");
+      
     },
     cancel(){
       this.msg.show = false
