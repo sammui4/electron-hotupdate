@@ -2,7 +2,7 @@
  * @Author: w
  * @Date: 2019-08-06 17:58:22
  * @LastEditors: w
- * @LastEditTime: 2019-08-13 17:47:45
+ * @LastEditTime: 2019-08-14 10:32:22
  */
 
 'use strict'
@@ -83,6 +83,7 @@ function updateNow(){
   }).then(({data})=>{
     if(data.code==200){
       let final = compareVersion(app.getVersion(),data.version);
+      console.log(final);
       let url;
       switch(final){
         case 1:

@@ -2,7 +2,7 @@
  * @Author: w
  * @Date: 2019-08-05 16:11:20
  * @LastEditors: w
- * @LastEditTime: 2019-08-13 15:04:53
+ * @LastEditTime: 2019-08-14 10:31:16
  -->
 <template>
   <transition name="fade">
@@ -65,7 +65,50 @@ export default {
     },
     updateApp() {
       // ipcRenderer.send("checkForUpdate");
+
+      this.$http({
+        method:'get',
+        url:'/update'
+      }).then(({data})=>{
+        if(data.code==200){
+          
+          var final = this.compareVersion(packages.version,data.version);
+          console.log(final);
+          switch(final){
+            case 0:
+              this.$message.success('暂无新版本!');
+            break;
+            case 1:
+              this.msg.show = true;
+              this.$message.success('正在自动下载新版本，请稍候。。。');
+            break;
+            case 2:
+              this.msg.show = true;
+              this.$message.success('正在自动下载新版本，请稍候。。。');
+            break;
+          }
+        }
+      })
       
+    },
+    // 0 一样（或者说不允许替代） 1非核心版本修改 2核心版本修改
+    // v1本地版本 v2远程版本
+    compareVersion(v1,v2){
+      if(v1==v2){
+        return 0
+      }
+      var v1Arr = v1.toString().split('.');
+      var v2Arr = v2.toString().split('.');
+      if(v1Arr[1] > v2Arr[1]){
+        return 0
+      }
+      if(v1Arr[1] < v2Arr[1] && v1Arr[2] > v2Arr[2]){
+        return 0
+      }
+      if(v1Arr[1] === v2Arr[1]){
+        return 1
+      }
+      return 2
     },
     cancel(){
       this.msg.show = false

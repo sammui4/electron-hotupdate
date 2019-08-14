@@ -2,10 +2,9 @@
  * @Author: w
  * @Date: 2019-08-13 09:55:50
  * @LastEditors: w
- * @LastEditTime: 2019-08-13 14:38:37
+ * @LastEditTime: 2019-08-14 10:26:24
  */
 import Vue from 'vue'
-import './plugins/axios'
 import App from './App.vue'
 import router from './router'
 import store from './store'
