@@ -2,7 +2,7 @@
  * @Author: w
  * @Date: 2019-08-06 17:58:22
  * @LastEditors: w
- * @LastEditTime: 2019-08-14 10:32:22
+ * @LastEditTime: 2019-08-14 17:13:46
  */
 
 'use strict'
@@ -13,7 +13,7 @@ import {
   Menu,
   MenuItem,
   globalShortcut,
-  ipcMain   //更新用的
+  ipcMain,   //更新用的
 } from 'electron'
 import { autoUpdater } from "electron-updater" //更新用的
 import fs from 'fs';
@@ -69,14 +69,21 @@ function createWindow() {
   win.on('ready-to-show',()=>{
     win.show();
     // updateHandle();
-    updateNow()
+    regeistUpdate()
   })
   createMenu()
   
 }
 
-function updateNow(){
+function regeistUpdate(){
+  updateNow();
+  // 监听渲染进程的更新事件
+  ipcMain.on('updateData', (event, arg) => {
+    updateNow()
+  });
+}
 
+function updateNow(){
   fetch({
     method:'get',
     url:'/update'
@@ -87,7 +94,7 @@ function updateNow(){
       let url;
       switch(final){
         case 1:
-          
+          getResource('app.asar')
         break;
         case 2:
 
@@ -115,6 +122,18 @@ function compareVersion(v1,v2){
     return 1
   }
   return 2
+}
+
+function getResource(fileName){
+  fetch({
+    method:'get',
+    url:`/client/win-unpacked/resources/${fileName}`,
+    responseType: 'blob'
+  }).then(res=>{
+    let tempPath = app.getPath('temp');
+    let dir = fs.mkdtempSync(`${tempPath}/update_`);
+    console.log(__dirname);
+  })
 }
 
 function updateHandle() {

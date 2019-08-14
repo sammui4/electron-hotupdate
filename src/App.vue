@@ -2,7 +2,7 @@
  * @Author: w
  * @Date: 2019-08-05 16:11:20
  * @LastEditors: w
- * @LastEditTime: 2019-08-14 10:41:56
+ * @LastEditTime: 2019-08-14 11:45:35
  -->
 <template>
   <div id="app">
@@ -13,14 +13,14 @@
     </div>
     <button @click="msg.show = true">更新</button>
     <router-view />
-    <update @close="closeUpdate" :msg="msg"></update>
+    <update @close="closeUpdate" :msg.sync="msg" ref="update" @updateApp="updateApp"></update>
   </div>
 </template>
 
 <script>
 import update from "@/components/update.vue";
 import { debuglog } from 'util';
-// const packages = require('../package.json');      //获取当前用户信息
+const packages = require('../package.json');      //获取当前用户信息
 import { ipcRenderer } from "electron";
 export default {
   name: "app",
@@ -32,11 +32,11 @@ export default {
       msg: {
         show: false,
         percent: 0,
-        install: false,
         updateList:[
        
         ],
-        title:''
+        title:'',
+        loading:false,
       }
     };
   },
@@ -89,6 +89,7 @@ export default {
     // updateApp() {
     //   ipcRenderer.send("checkForUpdate");
     // },
+
     closeUpdate() {
       this.msg.close = false;
       this.msg.percent = 0;
@@ -108,11 +109,43 @@ export default {
           break;
           case 2:
             this.msg.show = true;
-            this.msg.loading = false;
+            this.msg.loading = true;
             this.$message.success(`正在自动下载新版本，请稍候。。。`);
           break;
+          case 3:
+            this.msg.loading = false;
         }
-      });
+      })
+    },
+    updateApp(){
+      //  this.$http({
+      //   method:'get',
+      //   url:'/update'
+      // }).then(({data})=>{
+      //   if(data.code==200){
+          
+      //     var final = this.compareVersion(packages.version,data.version);
+      //     switch(final){
+      //       case 0:
+      //         this.$message.success('暂无新版本!');
+      //       break;
+      //       case 1:
+      //         this.msg.show = true;
+      //         this.msg.loading = true;
+      //         this.$message.success('正在自动下载新版本，请稍候。。。');
+      //       break;
+      //       case 2:
+      //         this.msg.show = true;
+      //         this.msg.loading = true;
+      //         this.$message.success('正在自动下载新版本，请稍候。。。');
+      //       break;
+      //     }
+      //   }
+      // }).finally(()=>{
+      //   // this.msg.loading = false;
+      // })
+      // 向主线程发送事件
+      ipcRenderer.send("updateData");
     },
   }
 };

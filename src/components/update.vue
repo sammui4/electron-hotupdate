@@ -2,7 +2,7 @@
  * @Author: w
  * @Date: 2019-08-05 16:11:20
  * @LastEditors: w
- * @LastEditTime: 2019-08-14 10:31:16
+ * @LastEditTime: 2019-08-14 10:59:19
  -->
 <template>
   <transition name="fade">
@@ -23,10 +23,9 @@
         </ul>
         <el-progress :percentage="msg.percent"></el-progress>
       </div>
-      
       <div class="dialog-footer" slot="footer">
         <el-button size="small" @click="updateApp" type="primary" :loading="msg.loading">确定</el-button>
-        <el-button size="small" @click="cancel()" v-if="msg.loading==true">取消</el-button>
+        <el-button size="small" @click="cancel()" v-if="msg.loading==false">取消</el-button>
       </div>
     </el-dialog>
     
@@ -65,50 +64,7 @@ export default {
     },
     updateApp() {
       // ipcRenderer.send("checkForUpdate");
-
-      this.$http({
-        method:'get',
-        url:'/update'
-      }).then(({data})=>{
-        if(data.code==200){
-          
-          var final = this.compareVersion(packages.version,data.version);
-          console.log(final);
-          switch(final){
-            case 0:
-              this.$message.success('暂无新版本!');
-            break;
-            case 1:
-              this.msg.show = true;
-              this.$message.success('正在自动下载新版本，请稍候。。。');
-            break;
-            case 2:
-              this.msg.show = true;
-              this.$message.success('正在自动下载新版本，请稍候。。。');
-            break;
-          }
-        }
-      })
-      
-    },
-    // 0 一样（或者说不允许替代） 1非核心版本修改 2核心版本修改
-    // v1本地版本 v2远程版本
-    compareVersion(v1,v2){
-      if(v1==v2){
-        return 0
-      }
-      var v1Arr = v1.toString().split('.');
-      var v2Arr = v2.toString().split('.');
-      if(v1Arr[1] > v2Arr[1]){
-        return 0
-      }
-      if(v1Arr[1] < v2Arr[1] && v1Arr[2] > v2Arr[2]){
-        return 0
-      }
-      if(v1Arr[1] === v2Arr[1]){
-        return 1
-      }
-      return 2
+      this.$emit('updateApp');
     },
     cancel(){
       this.msg.show = false
