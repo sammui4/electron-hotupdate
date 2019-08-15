@@ -2,7 +2,7 @@
  * @Author: w
  * @Date: 2019-08-05 16:11:20
  * @LastEditors: w
- * @LastEditTime: 2019-08-14 10:59:19
+ * @LastEditTime: 2019-08-15 14:44:29
  -->
 <template>
   <transition name="fade">
@@ -34,7 +34,6 @@
 
 <script>
 import { ipcRenderer } from "electron";
-import queueAjax from '@/assets/scripts/queue.js'
 export default {
   name: "update",
   props: {
