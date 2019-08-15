@@ -2,7 +2,7 @@
  * @Author: w
  * @Date: 2019-08-05 16:11:20
  * @LastEditors: w
- * @LastEditTime: 2019-08-14 17:39:18
+ * @LastEditTime: 2019-08-15 18:34:41
  -->
 <template>
   <div id="app">
@@ -97,7 +97,7 @@ export default {
     },
     getUpdateInfo(){
       ipcRenderer.on("message", (event, data) => {
-        switch(data){
+        switch(data.status){
           case 0:
             this.msg.show = false;
             this.$message.info(`暂无新版本!`);
@@ -105,18 +105,22 @@ export default {
           case 1:
             this.msg.show = true;
             this.msg.loading = true;
-            this.$message.success(`正在自动下载新版本，请稍候。。。`);
+            this.$message.success(`正在自动下载新版本，请稍候。。。1`);
           break;
           case 2:
             this.msg.show = true;
             this.msg.loading = true;
-            this.$message.success(`正在自动下载新版本，请稍候。。。`);
+            this.$message.success(`正在自动下载新版本，请稍候。。。2`);
           break;
           case 3:
             this.msg.loading = false;
           break;
           default:
-            this.$message.success(`${data}`);
+            this.$message({
+              type:data.type?data.type:'error',
+              message:data.msg,
+              duration:data.duration?data.duration:3000
+            })
           break;
         }
       })

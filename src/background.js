@@ -2,7 +2,7 @@
  * @Author: w
  * @Date: 2019-08-06 17:58:22
  * @LastEditors: w
- * @LastEditTime: 2019-08-14 17:13:46
+ * @LastEditTime: 2019-08-15 19:06:39
  */
 
 'use strict'
@@ -13,16 +13,19 @@ import {
   Menu,
   MenuItem,
   globalShortcut,
-  ipcMain,   //更新用的
+  ipcMain, //更新用的
 } from 'electron'
-import { autoUpdater } from "electron-updater" //更新用的
+import {
+  autoUpdater
+} from "electron-updater" //更新用的
 import fs from 'fs';
 import fetch from './assets/scripts/fetch.js';
-import tar from 'tar';
+import path from 'path';
 import {
   createProtocol,
   installVueDevtools
 } from 'vue-cli-plugin-electron-builder/lib'
+const request = require('request');
 const isDevelopment = process.env.NODE_ENV !== 'production'
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -49,7 +52,7 @@ function createWindow() {
     },
     icon: `${__static}/app.ico`,
     // 先不显示
-    show:false
+    show: false
   })
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode
@@ -64,99 +67,182 @@ function createWindow() {
   win.on('closed', () => {
     win = null
   })
-  
+
   // ready后show
-  win.on('ready-to-show',()=>{
+  win.on('ready-to-show', () => {
     win.show();
     // updateHandle();
     regeistUpdate()
   })
   createMenu()
-  
+
 }
 
-function regeistUpdate(){
-  updateNow();
+function regeistUpdate() {
+  // updateNow();
   // 监听渲染进程的更新事件
   ipcMain.on('updateData', (event, arg) => {
     updateNow()
   });
 }
 
-function updateNow(){
+function updateNow() {
   fetch({
-    method:'get',
-    url:'/update'
-  }).then(({data})=>{
-    if(data.code==200){
-      let final = compareVersion(app.getVersion(),data.version);
+    method: 'get',
+    url: '/update'
+  }).then(({
+    data
+  }) => {
+    if (data.code == 200) {
+      let final = compareVersion(app.getVersion(), data.version);
       console.log(final);
       let url;
-      switch(final){
+      switch (final.status) {
         case 1:
-          getResource('app.asar')
-        break;
+          getResource('http://localhost:888/client/win-unpacked/resources','app.asar',function(){
+            
+          })
+          break;
         case 2:
 
-        break;
+          break;
       }
       sendUpdateMessage(final);
     }
-    
+
   })
 }
 
-function compareVersion(v1,v2){
-  if(v1==v2){
-    return 0
+function compareVersion(v1, v2) {
+  if (v1 == v2) {
+    return {
+      status: 0,
+      msg: '暂无更新'
+    }
   }
   var v1Arr = v1.toString().split('.');
   var v2Arr = v2.toString().split('.');
-  if(v1Arr[1] > v2Arr[1]){
-    return 0
+  if (v1Arr[1] > v2Arr[1]) {
+    return {
+      status: 0,
+      msg: '暂无更新'
+    }
   }
-  if(v1Arr[1] < v2Arr[1] && v1Arr[2] > v2Arr[2]){
-    return 0
+  if (v1Arr[1] < v2Arr[1] && v1Arr[2] > v2Arr[2]) {
+    return {
+      status: 0,
+      msg: '暂无更新'
+    }
   }
-  if(v1Arr[1] === v2Arr[1]){
-    return 1
+  if (v1Arr[1] === v2Arr[1]) {
+    return {
+      status: 1,
+      msg: '有新版，请稍候'
+    }
   }
-  return 2
+  return {
+    status: 2,
+    msg: '有新版，请稍候'
+  }
 }
 
-function getResource(fileName){
-  fetch({
-    method:'get',
-    url:`/client/win-unpacked/resources/${fileName}`,
-    responseType: 'blob'
-  }).then(res=>{
-    let tempPath = app.getPath('temp');
-    let dir = fs.mkdtempSync(`${tempPath}/update_`);
-    console.log(__dirname);
+function getResource(fileUrl,name,callback) {
+  let filename = name
+  let fetchUrl = `${fileUrl}/${name}`;
+  var requests = request.get(fetchUrl);
+  requests.on('error', (err) => { })
+  // 移动方案
+  // requests.on('response', function(response) {
+  //   let tempPath = path.join(__dirname,'upgrade_'); 
+  //   let dir = fs.mkdtempSync(tempPath);
+  //   let paths = path.join(dir,filename);
+  //   process.noAsar = true;
+  //   requests.pipe(fs.createWriteStream(paths)).on('close',()=>{
+  //     var newPath = path.join(__dirname,filename)
+  //     // 移动方案
+  //     fs.rename(paths, newPath,(err)=>{
+  //       console.log(err);
+  //       fs.rmdir(dir,(err )=>{
+  //         if(err){
+  //           console.log(err);
+  //           return
+  //         }
+  //         callback()
+  //       });
+  //     });
+
+  //   })
+  // })
+
+  // 复制方案
+  requests.on('response', function(response) {
+    let paths = path.join(__dirname,filename);
+    process.noAsar = true;
+    requests.pipe(fs.createWriteStream(paths)).on('close',(err)=>{
+      if(err){
+        return sendUpdateMessage({
+          msg:error,
+          duration:0,
+        })
+      }
+      var newPath = path.join(__dirname, filename);
+      process.noAsar = false;
+      fs.rename(paths, newPath, (err) => {
+        if(err){
+          return sendUpdateMessage({
+            msg:error,
+            duration:0,
+          })
+        }
+        app.relaunch();  
+        app.exit();
+        
+      });
+      
+    })
   })
+
+  // 读取流文件成功后重启
+  // .on('close',()=>{     
+    // app.relaunch();   
+    // var newPath =  path.join(__dirname,filename);
+    // console.log(newPath);
+    // fs.rename(paths,newPath ,function(){
+    //   fs.rmdir(dir,(err )=>{
+    //     if(err){
+    //       return
+    //     }
+    //   });
+    // });
+  // })
+
+
+
+
 }
+
 
 function updateHandle() {
   let message = {
     error: {
       status: -1,
-      msg:'检查更新出错'
+      msg: '检查更新出错'
     },
     checking: {
       status: -0,
-      msg:'正在检查更新……'
+      msg: '正在检查更新……'
     },
-    updateAva:{
+    updateAva: {
       status: 1,
-      msg:'检测到新版本，正在下载……'
+      msg: '检测到新版本，正在下载……'
     },
-    updateNotAva:{
+    updateNotAva: {
       status: 2,
-      msg:'现在使用的就是最新版本，不用更新'
+      msg: '现在使用的就是最新版本，不用更新'
     },
-    updateFinish:{
+    updateFinish: {
       status: 3,
-      msg:'下载成功'
+      msg: '下载成功'
     }
   };
   const os = require('os');
@@ -180,7 +266,7 @@ function updateHandle() {
     win.webContents.send('downloadProgress', progressObj)
   })
   autoUpdater.on('update-downloaded', function (event, releaseNotes, releaseName, releaseDate, updateUrl, quitAndUpdate) {
-    
+
     ipcMain.on('isUpdateNow', (e, arg) => {
       console.log("开始更新");
       //some code here to handle event
@@ -189,9 +275,9 @@ function updateHandle() {
     win.webContents.send('isUpdateNow')
   });
 
-  ipcMain.on("checkForUpdate",()=>{
-      //执行自动更新检查
-      autoUpdater.checkForUpdates();
+  ipcMain.on("checkForUpdate", () => {
+    //执行自动更新检查
+    autoUpdater.checkForUpdates();
   })
 }
 
@@ -219,26 +305,24 @@ function createMenu() {
   } else {
     const template = [{
       label: '操作',
-      submenu: [
-        {
-          label: '重新加载',
-          accelerator: 'CmdOrCtrl+R',
-          click: function (item, focusedWindow) {
-              if (focusedWindow) {
-                  // on reload, start fresh and close any old
-                  // open secondary windows
-                  if (focusedWindow.id === 1) {
-                      BrowserWindow.getAllWindows().forEach(function (win) {
-                          if (win.id > 1) {
-                              win.close()
-                          }
-                      })
-                  }
-                  focusedWindow.reload()
-              }
+      submenu: [{
+        label: '重新加载',
+        accelerator: 'CmdOrCtrl+R',
+        click: function (item, focusedWindow) {
+          if (focusedWindow) {
+            // on reload, start fresh and close any old
+            // open secondary windows
+            if (focusedWindow.id === 1) {
+              BrowserWindow.getAllWindows().forEach(function (win) {
+                if (win.id > 1) {
+                  win.close()
+                }
+              })
+            }
+            focusedWindow.reload()
           }
         }
-      ]
+      }]
     }]
     let menu = Menu.buildFromTemplate(template)
     Menu.setApplicationMenu(menu);

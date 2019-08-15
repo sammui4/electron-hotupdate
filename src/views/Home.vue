@@ -2,12 +2,12 @@
  * @Author: w
  * @Date: 2019-08-05 16:11:20
  * @LastEditors: w
- * @LastEditTime: 2019-08-10 15:43:26
+ * @LastEditTime: 2019-08-15 19:02:22
  -->
 
 <template>
   <div class="home">
-    <p>version 1.2</p>
+    <p>version 1.3</p>
     <p>这是home页面</p>
   </div>
 </template>
