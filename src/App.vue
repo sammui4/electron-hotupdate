@@ -2,7 +2,7 @@
  * @Author: w
  * @Date: 2019-08-05 16:11:20
  * @LastEditors: w
- * @LastEditTime: 2019-08-14 11:45:35
+ * @LastEditTime: 2019-08-14 17:39:18
  -->
 <template>
   <div id="app">
@@ -114,36 +114,14 @@ export default {
           break;
           case 3:
             this.msg.loading = false;
+          break;
+          default:
+            this.$message.success(`${data}`);
+          break;
         }
       })
     },
     updateApp(){
-      //  this.$http({
-      //   method:'get',
-      //   url:'/update'
-      // }).then(({data})=>{
-      //   if(data.code==200){
-          
-      //     var final = this.compareVersion(packages.version,data.version);
-      //     switch(final){
-      //       case 0:
-      //         this.$message.success('暂无新版本!');
-      //       break;
-      //       case 1:
-      //         this.msg.show = true;
-      //         this.msg.loading = true;
-      //         this.$message.success('正在自动下载新版本，请稍候。。。');
-      //       break;
-      //       case 2:
-      //         this.msg.show = true;
-      //         this.msg.loading = true;
-      //         this.$message.success('正在自动下载新版本，请稍候。。。');
-      //       break;
-      //     }
-      //   }
-      // }).finally(()=>{
-      //   // this.msg.loading = false;
-      // })
       // 向主线程发送事件
       ipcRenderer.send("updateData");
     },
