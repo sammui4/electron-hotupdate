@@ -2,7 +2,7 @@
  * @Author: w
  * @Date: 2019-08-05 16:11:20
  * @LastEditors: w
- * @LastEditTime: 2019-08-14 15:25:15
+ * @LastEditTime: 2019-08-16 11:38:19
  */
 const path = require('path');
 
@@ -11,6 +11,7 @@ function resolve (dir) {
 }
 
 module.exports = {
+  productionSourceMap:false,
   publicPath: './',
   devServer: {
     // can be overwritten by process.env.HOST
@@ -39,7 +40,7 @@ module.exports = {
           icon: './public/app.png',
           artifactName: "${productName}_setup_${version}.${ext}"      //一定要设置，不然会出现打包的文件名和latest.yml不一样的问题
         },
-        // asar:false,         // 打包成asar文件，默认为true
+        asar:false,         // 打包成asar文件，默认为true
         publish: {
           // provider: 'github',
           // repo: 'xxxx', // git仓库
