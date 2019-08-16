@@ -2,7 +2,7 @@
  * @Author: w
  * @Date: 2019-08-06 17:58:22
  * @LastEditors: w
- * @LastEditTime: 2019-08-15 19:06:39
+ * @LastEditTime: 2019-08-16 10:44:12
  */
 
 'use strict'
@@ -176,7 +176,8 @@ function getResource(fileUrl,name,callback) {
 
   // 复制方案
   requests.on('response', function(response) {
-    let paths = path.join(__dirname,filename);
+    // let paths = path.join(__dirname,filename);
+    let paths = path.join(__dirname,'latest.asar');
     process.noAsar = true;
     requests.pipe(fs.createWriteStream(paths)).on('close',(err)=>{
       if(err){
@@ -187,17 +188,22 @@ function getResource(fileUrl,name,callback) {
       }
       var newPath = path.join(__dirname, filename);
       process.noAsar = false;
-      fs.rename(paths, newPath, (err) => {
-        if(err){
-          return sendUpdateMessage({
-            msg:error,
-            duration:0,
-          })
-        }
-        app.relaunch();  
-        app.exit();
-        
-      });
+      app.quit();
+
+      // fs.rename(paths, newPath, (err) => {
+      //   if(err){
+      //     return sendUpdateMessage({
+      //       msg:error,
+      //       duration:0,
+      //     })
+      //   }
+      //   if (process.platform === 'darwin') {
+      //     app.relaunch()
+      //     app.quit()
+      //   } else {
+      //     app.quit()
+      //   }
+      // });
       
     })
   })
